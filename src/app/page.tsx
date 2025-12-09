@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import QuoteForm from '@/components/QuoteForm';
 import QuoteResult from '@/components/QuoteResult';
+import DarkModeToggle from '@/components/DarkModeToggle';
 import { QuoteInput, QuoteResult as QuoteResultType } from '@/types';
 import { calculateQuote } from '@/lib/calculator';
 
@@ -22,14 +23,15 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 transition-colors duration-200">
+      <DarkModeToggle />
       <div className="max-w-4xl mx-auto">
         {/* 헤더 */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2 transition-colors duration-200">
             화물 요금 계산기
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400 transition-colors duration-200">
             수식 기반 화물 요금 계산 시스템
           </p>
         </div>
@@ -43,9 +45,9 @@ export default function Home() {
           {/* 결과 표시 */}
           <div className="sticky top-4">
             {isCalculating ? (
-              <div className="bg-white rounded-lg shadow-md p-6 text-center animate-fade-in">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                <p className="text-gray-600">계산 중...</p>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center animate-fade-in transition-colors duration-200">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-300 transition-colors duration-200">계산 중...</p>
               </div>
             ) : (
               <QuoteResult result={result} />
@@ -54,20 +56,20 @@ export default function Home() {
         </div>
 
         {/* 정보 섹션 */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">지원 범위</h2>
+        <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors duration-200">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4 transition-colors duration-200">지원 범위</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
-              <span className="font-medium text-gray-700">크기 (각 변):</span>
-              <span className="ml-2 text-gray-600">0.1cm ~ 500cm</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300 transition-colors duration-200">크기 (각 변):</span>
+              <span className="ml-2 text-gray-600 dark:text-gray-400 transition-colors duration-200">0.1cm ~ 500cm</span>
             </div>
             <div>
-              <span className="font-medium text-gray-700">부피:</span>
-              <span className="ml-2 text-gray-600">1㎤ ~ 10,000,000㎤</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300 transition-colors duration-200">부피:</span>
+              <span className="ml-2 text-gray-600 dark:text-gray-400 transition-colors duration-200">1㎤ ~ 10,000,000㎤</span>
             </div>
             <div>
-              <span className="font-medium text-gray-700">무게:</span>
-              <span className="ml-2 text-gray-600">0.01kg ~ 3,000kg</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300 transition-colors duration-200">무게:</span>
+              <span className="ml-2 text-gray-600 dark:text-gray-400 transition-colors duration-200">0.01kg ~ 3,000kg</span>
             </div>
           </div>
         </div>

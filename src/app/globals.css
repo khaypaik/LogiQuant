@@ -7,6 +7,11 @@
   --foreground: #111827;
 }
 
+.dark {
+  --background: #111827;
+  --foreground: #f9fafb;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
@@ -15,6 +20,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* 스크롤바 스타일링 */
@@ -27,13 +33,25 @@ body {
   background: #f1f1f1;
 }
 
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 
 /* 입력 필드 포커스 애니메이션 */
@@ -58,6 +76,14 @@ input[type="text"],
 select {
   background-color: #ffffff !important;
   color: #111827 !important;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease !important;
+}
+
+.dark input[type="number"],
+.dark input[type="text"],
+.dark select {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
 }
 
 input[type="number"]:focus,
@@ -67,10 +93,21 @@ select:focus {
   color: #111827 !important;
 }
 
+.dark input[type="number"]:focus,
+.dark input[type="text"]:focus,
+.dark select:focus {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
 /* Placeholder 색상 개선 */
 input::placeholder {
   color: #9ca3af !important;
   opacity: 1;
+}
+
+.dark input::placeholder {
+  color: #6b7280 !important;
 }
 
 /* Radio 버튼 스타일 개선 - 커스텀 스타일 */
@@ -89,9 +126,19 @@ input[type="radio"] {
   transition: all 0.2s ease !important;
 }
 
+.dark input[type="radio"] {
+  border-color: #6b7280 !important;
+  background-color: #374151 !important;
+}
+
 input[type="radio"]:checked {
   border-color: #2563eb !important;
   background-color: #ffffff !important;
+}
+
+.dark input[type="radio"]:checked {
+  border-color: #60a5fa !important;
+  background-color: #374151 !important;
 }
 
 input[type="radio"]:checked::before {
@@ -106,8 +153,16 @@ input[type="radio"]:checked::before {
   background-color: #2563eb !important;
 }
 
+.dark input[type="radio"]:checked::before {
+  background-color: #60a5fa !important;
+}
+
 input[type="radio"]:hover {
   border-color: #2563eb !important;
+}
+
+.dark input[type="radio"]:hover {
+  border-color: #60a5fa !important;
 }
 
 input[type="radio"]:focus {
@@ -116,7 +171,16 @@ input[type="radio"]:focus {
   border-color: #2563eb !important;
 }
 
+.dark input[type="radio"]:focus {
+  outline-color: #60a5fa !important;
+  border-color: #60a5fa !important;
+}
+
 input[type="radio"]:checked:focus {
   border-color: #2563eb !important;
+}
+
+.dark input[type="radio"]:checked:focus {
+  border-color: #60a5fa !important;
 }
 

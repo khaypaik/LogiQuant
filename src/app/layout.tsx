@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { DarkModeProvider } from "@/contexts/DarkModeContext";
 
 export const metadata: Metadata = {
   title: "화물 요금 계산기",
@@ -12,8 +13,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
-      <body>{children}</body>
+    <html lang="ko" suppressHydrationWarning>
+      <body>
+        <DarkModeProvider>
+          {children}
+        </DarkModeProvider>
+      </body>
     </html>
   );
 }
