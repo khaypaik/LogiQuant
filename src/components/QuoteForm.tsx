@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { QuoteInput, ShippingMode, Region, QuoteResult as QuoteResultType } from '@/types';
 import { calcVolumeWeight } from '@/lib/utils';
 import { LIMITS } from '@/lib/constants';
@@ -21,7 +21,7 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const calculationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialMount = useRef(true); // 초기 마운트 여부 추적
 
   // 부피중량 자동 계산
   const volumeWeight = calcVolumeWeight(
@@ -30,86 +30,50 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
     formData.heightCm
   );
 
-  // 입력값 변경 시 자동 계산 (debounce 적용)
-  useEffect(() => {
-    // 이전 타이머 취소
-    if (calculationTimeoutRef.current) {
-      clearTimeout(calculationTimeoutRef.current);
-    }
-
-    // 500ms 후에 계산 실행 (debounce)
-    calculationTimeoutRef.current = setTimeout(() => {
-      if (isFormValid(formData)) {
-        onSubmit(formData);
-      }
-    }, 500);
-
-    // cleanup 함수
-    return () => {
-      if (calculationTimeoutRef.current) {
-        clearTimeout(calculationTimeoutRef.current);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.widthCm, formData.depthCm, formData.heightCm, formData.weightKg, formData.mode, formData.region]);
-
   // 입력값 유효성 검사
   const validateField = (name: string, value: number): string | null => {
     switch (name) {
       case 'widthCm':
       case 'depthCm':
       case 'heightCm':
-        if (value < 0.1 || value > LIMITS.MAX_DIMENSION_CM) {
-          return `${name === 'widthCm' ? '가로' : name === 'depthCm' ? '세로' : '높이'}는 0.1cm 이상 ${LIMITS.MAX_DIMENSION_CM}cm 이하여야 합니다.`;
+        if (value < 1 || value > LIMITS.MAX_DIMENSION_CM) {
+          return `${name === 'widthCm' ? '가로' : name === 'depthCm' ? '세로' : '높이'}는 1cm 이상 ${LIMITS.MAX_DIMENSION_CM}cm 이하여야 합니다.`;
         }
         break;
       case 'weightKg':
-        if (value < 0.01 || value > LIMITS.MAX_WEIGHT_KG) {
-          return `무게는 0.01kg 이상 ${LIMITS.MAX_WEIGHT_KG.toLocaleString()}kg 이하여야 합니다.`;
+        if (value < 1 || value > LIMITS.MAX_WEIGHT_KG) {
+          return `무게는 1kg 이상 ${LIMITS.MAX_WEIGHT_KG.toLocaleString()}kg 이하여야 합니다.`;
         }
         break;
     }
     return null;
   };
 
-  const handleChange = (name: keyof QuoteInput, value: string | number, autoCalculate: boolean = false) => {
+  const handleChange = (name: keyof QuoteInput, value: string | number) => {
     // mode와 region은 문자열이므로 숫자 변환하지 않음
     if (name === 'mode') {
-      setFormData((prev) => {
-        const newData = {
-          ...prev,
-          mode: value as ShippingMode,
-        };
-        // 배송 방식 변경 시 자동 재계산
-        setTimeout(() => {
-          if (isFormValid(newData)) {
-            onSubmit(newData);
-          }
-        }, 0);
-        return newData;
-      });
+      setFormData((prev) => ({
+        ...prev,
+        mode: value as ShippingMode,
+      }));
       return;
     }
     
     if (name === 'region') {
-      setFormData((prev) => {
-        const newData = {
-          ...prev,
-          region: value as Region,
-        };
-        // 지역 변경 시 자동 재계산
-        setTimeout(() => {
-          if (isFormValid(newData)) {
-            onSubmit(newData);
-          }
-        }, 0);
-        return newData;
-      });
+      setFormData((prev) => ({
+        ...prev,
+        region: value as Region,
+      }));
       return;
     }
     
     // 숫자 필드는 변환 및 유효성 검사
-    const numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+    let numValue = typeof value === 'string' ? parseFloat(value) || 0 : value;
+    
+    // 크기 필드와 실중량 필드는 정수로 반올림 (스피너가 1씩 변화하도록 설정했으므로)
+    if (name === 'widthCm' || name === 'depthCm' || name === 'heightCm' || name === 'weightKg') {
+      numValue = Math.round(numValue);
+    }
     
     // 실시간 유효성 검사
     const error = validateField(name, numValue);
@@ -122,19 +86,6 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
       ...prev,
       [name]: numValue,
     }));
-    
-    // 슬라이더 변경 시 즉시 계산 (debounce 없이)
-    if (autoCalculate) {
-      setTimeout(() => {
-        const newData = {
-          ...formData,
-          [name]: numValue,
-        };
-        if (isFormValid(newData)) {
-          onSubmit(newData);
-        }
-      }, 0);
-    }
   };
 
   // 폼 유효성 검사 함수
@@ -162,12 +113,25 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
     return true;
   };
 
-  // 계산 트리거 함수 (엔터 키 또는 제출 버튼에서 사용)
+  // 계산 트리거 함수
   const triggerCalculation = () => {
     if (isFormValid(formData)) {
       onSubmit(formData);
     }
   };
+
+  // 입력값 변경 시 자동 계산 (초기 마운트 제외)
+  useEffect(() => {
+    // 초기 마운트 시에는 계산하지 않음
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // 입력값 변경 시 자동 계산
+    triggerCalculation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.widthCm, formData.depthCm, formData.heightCm, formData.weightKg, formData.mode, formData.region]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -254,8 +218,8 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
             <input
               type="number"
               id="widthCm"
-              step="0.1"
-              min="0.1"
+              step="1"
+              min="1"
               max={LIMITS.MAX_DIMENSION_CM}
               value={formData.widthCm}
               onChange={(e) => handleChange('widthCm', e.target.value)}
@@ -274,7 +238,7 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
                 value={Math.round(formData.widthCm / 5) * 5}
                 onChange={(e) => {
                   const sliderValue = parseInt(e.target.value);
-                  handleChange('widthCm', sliderValue, true);
+                  handleChange('widthCm', sliderValue);
                 }}
                 className="w-full appearance-none cursor-pointer slider"
               />
@@ -295,8 +259,8 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
             <input
               type="number"
               id="depthCm"
-              step="0.1"
-              min="0.1"
+              step="1"
+              min="1"
               max={LIMITS.MAX_DIMENSION_CM}
               value={formData.depthCm}
               onChange={(e) => handleChange('depthCm', e.target.value)}
@@ -315,7 +279,7 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
                 value={Math.round(formData.depthCm / 5) * 5}
                 onChange={(e) => {
                   const sliderValue = parseInt(e.target.value);
-                  handleChange('depthCm', sliderValue, true);
+                  handleChange('depthCm', sliderValue);
                 }}
                 className="w-full appearance-none cursor-pointer slider"
               />
@@ -336,8 +300,8 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
             <input
               type="number"
               id="heightCm"
-              step="0.1"
-              min="0.1"
+              step="1"
+              min="1"
               max={LIMITS.MAX_DIMENSION_CM}
               value={formData.heightCm}
               onChange={(e) => handleChange('heightCm', e.target.value)}
@@ -356,7 +320,7 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
                 value={Math.round(formData.heightCm / 5) * 5}
                 onChange={(e) => {
                   const sliderValue = parseInt(e.target.value);
-                  handleChange('heightCm', sliderValue, true);
+                  handleChange('heightCm', sliderValue);
                 }}
                 className="w-full appearance-none cursor-pointer slider"
               />
@@ -395,8 +359,8 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
           <input
             type="number"
             id="weightKg"
-            step="0.01"
-            min="0.01"
+            step="1"
+            min="1"
             max={LIMITS.MAX_WEIGHT_KG}
             value={formData.weightKg}
             onChange={(e) => handleChange('weightKg', e.target.value)}
@@ -405,23 +369,23 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
               errors.weightKg ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
             }`}
           />
-          {/* 슬라이더 - 1 단위 */}
+          {/* 슬라이더 - 5 단위 */}
           <div className="mt-2 px-1 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
             <input
               type="range"
-              min="1"
+              min="5"
               max={LIMITS.MAX_WEIGHT_KG}
-              step="1"
-              value={Math.round(formData.weightKg)}
+              step="5"
+              value={Math.round(formData.weightKg / 5) * 5}
               onChange={(e) => {
                 const sliderValue = parseInt(e.target.value);
-                handleChange('weightKg', sliderValue, true);
+                handleChange('weightKg', sliderValue);
               }}
               className="w-full appearance-none cursor-pointer slider"
             />
           </div>
           <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-            <span>1</span>
+            <span>5</span>
             <span>{LIMITS.MAX_WEIGHT_KG.toLocaleString()}</span>
           </div>
           {errors.weightKg && (

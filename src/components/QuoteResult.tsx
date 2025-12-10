@@ -1,14 +1,101 @@
 'use client';
 
+import { useState } from 'react';
 import { QuoteResult as QuoteResultType } from '@/types';
 
 interface QuoteResultProps {
   result: QuoteResultType | null;
 }
 
+// 사용 방법 컴포넌트
+function UsageGuide() {
+  return (
+    <div className="text-center">
+      <div className="mb-6">
+        <svg
+          className="w-16 h-16 mx-auto text-blue-500 dark:text-blue-400 mb-4 transition-colors duration-200"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2 transition-colors duration-200">
+          사용 방법
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 transition-colors duration-200">
+          간단한 3단계로 예상 배송비를 확인하세요
+        </p>
+      </div>
+
+      <div className="space-y-4 text-left">
+        <div className="flex items-start">
+          <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-4">
+            <span className="text-blue-600 dark:text-blue-400 font-bold">1</span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-1 transition-colors duration-200">
+              화물 정보 입력
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-200">
+              왼쪽 폼에 화물의 가로, 세로, 높이(cm)와 실중량(kg)을 입력하세요. 슬라이더를 사용하거나 직접 입력할 수 있습니다.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start">
+          <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-4">
+            <span className="text-blue-600 dark:text-blue-400 font-bold">2</span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-1 transition-colors duration-200">
+              배송 방식 선택
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-200">
+              해운, 항공-CJ, 항공-롯데 중 배송 방식을 선택하고, 배송 지역(수도권/제주/기타)을 선택하세요.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start">
+          <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-4">
+            <span className="text-blue-600 dark:text-blue-400 font-bold">3</span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-800 dark:text-gray-100 mb-1 transition-colors duration-200">
+              견적 확인
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-200">
+              '요금 계산' 버튼을 클릭하면 예상 배송비와 상세 내역이 표시됩니다. 계산 과정도 투명하게 확인할 수 있습니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 transition-colors duration-200">
+          <p className="text-sm text-blue-800 dark:text-blue-200 transition-colors duration-200">
+            <span className="font-semibold">💡 팁:</span> 슬라이더를 드래그하면 빠르게 값을 조정할 수 있어요!
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function QuoteResult({ result }: QuoteResultProps) {
+  const [showUsageGuide, setShowUsageGuide] = useState(false);
   if (!result) {
-    return null;
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-2 border-blue-200 dark:border-blue-700 transition-colors duration-200">
+        <UsageGuide />
+      </div>
+    );
   }
 
   if (!result.success) {
@@ -44,7 +131,36 @@ export default function QuoteResult({ result }: QuoteResultProps) {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-2 border-blue-200 dark:border-blue-700 transition-colors duration-200">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 transition-colors duration-200">견적 결과</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 transition-colors duration-200">견적 결과</h2>
+        <button
+          onClick={() => setShowUsageGuide(!showUsageGuide)}
+          className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+          aria-label="사용 방법 보기"
+          title="사용 방법 보기"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* 사용 방법 토글 */}
+      {showUsageGuide && (
+        <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+          <UsageGuide />
+        </div>
+      )}
 
       {/* 최종 요금 */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white rounded-lg p-6 mb-6 text-center transition-colors duration-200">
