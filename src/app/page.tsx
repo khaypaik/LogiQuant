@@ -35,11 +35,8 @@ export default function Home() {
               style={{ maxWidth: '100%', height: 'auto' }}
             />
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2 transition-colors duration-200">
-            LogiQuant
-          </h1>
           <p className="text-gray-600 dark:text-gray-400 transition-colors duration-200 text-sm md:text-base">
-            수식 기반 화물 요금 계산 시스템
+            수식 기반 예상 해외 배송비 계산 시스템 - 로지퀀트(LogiQuant)
           </p>
         </div>
 
