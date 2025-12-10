@@ -26,15 +26,18 @@ export default function Home() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4 px-4">
             <Image
-              src="/LogiQuant-logo-and-title.png"
+              src="/LogiQuant-monogram.png"
               alt="LogiQuant - 화물 요금 계산기"
-              width={500}
-              height={150}
+              width={300}
+              height={300}
               priority
-              className="w-full max-w-md md:max-w-lg lg:max-w-xl h-auto transition-opacity duration-200"
+              className="w-full max-w-xs md:max-w-sm lg:max-w-md h-auto transition-opacity duration-200"
               style={{ maxWidth: '100%', height: 'auto' }}
             />
           </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2 transition-colors duration-200">
+            LogiQuant
+          </h1>
           <p className="text-gray-600 dark:text-gray-400 transition-colors duration-200 text-sm md:text-base">
             수식 기반 화물 요금 계산 시스템
           </p>
