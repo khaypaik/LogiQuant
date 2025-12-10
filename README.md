@@ -29,6 +29,7 @@
 - **언어**: TypeScript
 - **스타일링**: Tailwind CSS 3.x
 - **테스팅**: Jest + React Testing Library
+- **광고**: Google AdSense
 
 ## 시작하기
 

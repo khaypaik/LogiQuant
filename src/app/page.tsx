@@ -4,6 +4,7 @@ import { useState } from 'react';
 import QuoteForm from '@/components/QuoteForm';
 import QuoteResult from '@/components/QuoteResult';
 import DarkModeToggle from '@/components/DarkModeToggle';
+import AdSense from '@/components/AdSense';
 import { QuoteInput, QuoteResult as QuoteResultType } from '@/types';
 import { calculateQuote } from '@/lib/calculator';
 
@@ -39,6 +40,17 @@ export default function Home() {
           {/* 결과 표시 */}
           <div className="sticky top-4">
             <QuoteResult result={result} />
+            {/* 계산 결과 아래 광고 배치 */}
+            {result && result.success && (
+              <div className="mt-6">
+                <AdSense 
+                  adSlot="1234567890" 
+                  adFormat="auto"
+                  fullWidthResponsive={true}
+                  className="rounded-lg"
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -59,6 +71,16 @@ export default function Home() {
               <span className="ml-2 text-gray-600 dark:text-gray-400 transition-colors duration-200">0.01kg ~ 3,000kg</span>
             </div>
           </div>
+        </div>
+
+        {/* 페이지 하단 광고 */}
+        <div className="mt-8">
+          <AdSense 
+            adSlot="1234567890" 
+            adFormat="auto"
+            fullWidthResponsive={true}
+            className="rounded-lg"
+          />
         </div>
       </div>
     </main>

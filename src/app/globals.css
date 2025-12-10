@@ -106,6 +106,28 @@ input::placeholder {
   opacity: 1;
 }
 
+/* 애드센스 광고 컨테이너 스타일링 */
+.ad-container {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+  transition: background-color 0.2s;
+}
+
+.dark .ad-container {
+  background-color: #1f2937;
+}
+
+/* 애드센스 광고가 로드되지 않았을 때 */
+.ad-container:empty {
+  display: none;
+}
+
 .dark input::placeholder {
   color: #6b7280 !important;
 }
