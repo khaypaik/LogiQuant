@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { DarkModeProvider } from "@/contexts/DarkModeContext";
 
@@ -47,6 +48,7 @@ export default function RootLayout({
         <DarkModeProvider>
           {children}
         </DarkModeProvider>
+        <Analytics />
       </body>
     </html>
   );
