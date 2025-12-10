@@ -43,7 +43,7 @@ export default function QuoteResult({ result }: QuoteResultProps) {
   const { finalPrice, breakdown, warnings, calculationDetails } = result;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-2 border-blue-200 dark:border-blue-700 animate-fade-in transition-colors duration-200">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-2 border-blue-200 dark:border-blue-700 transition-colors duration-200">
       <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 transition-colors duration-200">견적 결과</h2>
 
       {/* 최종 요금 */}

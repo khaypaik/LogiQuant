@@ -9,17 +9,11 @@ import { calculateQuote } from '@/lib/calculator';
 
 export default function Home() {
   const [result, setResult] = useState<QuoteResultType | null>(null);
-  const [isCalculating, setIsCalculating] = useState(false);
 
   const handleSubmit = (input: QuoteInput) => {
-    setIsCalculating(true);
-    
-    // 계산 수행 (비동기로 처리하여 UI 반응성 향상)
-    setTimeout(() => {
-      const calculatedResult = calculateQuote(input);
-      setResult(calculatedResult);
-      setIsCalculating(false);
-    }, 100);
+    // 계산을 동기적으로 처리하여 깜빡임 방지
+    const calculatedResult = calculateQuote(input);
+    setResult(calculatedResult);
   };
 
   return (
@@ -44,14 +38,7 @@ export default function Home() {
 
           {/* 결과 표시 */}
           <div className="sticky top-4">
-            {isCalculating ? (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center animate-fade-in transition-colors duration-200">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
-                <p className="text-gray-600 dark:text-gray-300 transition-colors duration-200">계산 중...</p>
-              </div>
-            ) : (
-              <QuoteResult result={result} />
-            )}
+            <QuoteResult result={result} />
           </div>
         </div>
 

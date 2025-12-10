@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { QuoteInput, ShippingMode, Region, QuoteResult as QuoteResultType } from '@/types';
 import { calcVolumeWeight } from '@/lib/utils';
 import { LIMITS } from '@/lib/constants';
@@ -21,6 +21,7 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const calculationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 부피중량 자동 계산
   const volumeWeight = calcVolumeWeight(
@@ -28,6 +29,29 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
     formData.depthCm,
     formData.heightCm
   );
+
+  // 입력값 변경 시 자동 계산 (debounce 적용)
+  useEffect(() => {
+    // 이전 타이머 취소
+    if (calculationTimeoutRef.current) {
+      clearTimeout(calculationTimeoutRef.current);
+    }
+
+    // 500ms 후에 계산 실행 (debounce)
+    calculationTimeoutRef.current = setTimeout(() => {
+      if (isFormValid(formData)) {
+        onSubmit(formData);
+      }
+    }, 500);
+
+    // cleanup 함수
+    return () => {
+      if (calculationTimeoutRef.current) {
+        clearTimeout(calculationTimeoutRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.widthCm, formData.depthCm, formData.heightCm, formData.weightKg, formData.mode, formData.region]);
 
   // 입력값 유효성 검사
   const validateField = (name: string, value: number): string | null => {
@@ -48,7 +72,7 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
     return null;
   };
 
-  const handleChange = (name: keyof QuoteInput, value: string | number) => {
+  const handleChange = (name: keyof QuoteInput, value: string | number, autoCalculate: boolean = false) => {
     // mode와 region은 문자열이므로 숫자 변환하지 않음
     if (name === 'mode') {
       setFormData((prev) => {
@@ -98,6 +122,19 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
       ...prev,
       [name]: numValue,
     }));
+    
+    // 슬라이더 변경 시 즉시 계산 (debounce 없이)
+    if (autoCalculate) {
+      setTimeout(() => {
+        const newData = {
+          ...formData,
+          [name]: numValue,
+        };
+        if (isFormValid(newData)) {
+          onSubmit(newData);
+        }
+      }, 0);
+    }
   };
 
   // 폼 유효성 검사 함수
@@ -155,23 +192,45 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
     const domesticShipping = result.breakdown?.domesticShipping || 0;
 
     // 배송 방식에 따른 라벨 결정
-    const shippingModeLabel = formData.mode === 'SEA' ? '해운' : '항공';
+    const shippingModeLabel = formData.mode === 'SEA' ? '해운' : 
+                              formData.mode === 'AIR_CJ' ? '항공-CJ' : '항공-롯데';
 
     return (
-      <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-800/40 border-2 border-blue-300 dark:border-blue-600 rounded-lg shadow-sm animate-fade-in transition-colors duration-200">
-        <div className="text-sm font-semibold text-blue-900 dark:text-blue-100 text-center transition-colors duration-200">
-          <span className="text-sm font-medium text-blue-700 dark:text-blue-300">예상 배송비: </span>
-          <span className="text-base text-blue-800 dark:text-blue-200 font-bold">{baseShipping.toLocaleString()}원</span>
-          <span className="text-xs text-blue-600 dark:text-blue-300 font-normal">({shippingModeLabel})</span>
-          {domesticShipping > 0 && (
-            <>
-              <span className="mx-2 text-blue-600 dark:text-blue-300 font-normal">+</span>
-              <span className="text-base text-blue-800 dark:text-blue-200 font-bold">{domesticShipping.toLocaleString()}원</span>
-              <span className="text-xs text-blue-600 dark:text-blue-300 font-normal">(경동)</span>
-            </>
-          )}
-          <span className="mx-2 text-blue-600 dark:text-blue-300 font-normal">=</span>
-          <span className="text-xl text-blue-900 dark:text-blue-100 font-extrabold">{result.finalPrice.toLocaleString()}원</span>
+      <div className="mt-3 p-4 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-800/40 border-2 border-blue-300 dark:border-blue-600 rounded-lg shadow-sm transition-colors duration-200">
+        <div className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2 transition-colors duration-200">
+          예상 배송비 (단위: 원)
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-blue-300 dark:border-blue-600">
+                <th className="text-left py-2 px-3 text-blue-700 dark:text-blue-300 font-medium">해외 배송비</th>
+                <th className="text-left py-2 px-3 text-blue-700 dark:text-blue-300 font-medium">국내 배송비</th>
+                <th className="text-right py-2 px-3 text-blue-700 dark:text-blue-300 font-medium">예상 총 비용</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="py-2 px-3 text-blue-900 dark:text-blue-100">
+                  <span className="font-bold">{baseShipping.toLocaleString()}</span>
+                  <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">({shippingModeLabel})</span>
+                </td>
+                <td className="py-2 px-3 text-blue-900 dark:text-blue-100">
+                  {domesticShipping > 0 ? (
+                    <>
+                      <span className="font-bold">{domesticShipping.toLocaleString()}</span>
+                      <span className="text-xs text-blue-600 dark:text-blue-400 ml-1">(경동)</span>
+                    </>
+                  ) : (
+                    <span className="text-blue-600 dark:text-blue-400">-</span>
+                  )}
+                </td>
+                <td className="py-2 px-3 text-right">
+                  <span className="text-lg font-extrabold text-blue-900 dark:text-blue-100">{result.finalPrice.toLocaleString()}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     );
@@ -205,6 +264,25 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
                 errors.widthCm ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
               }`}
             />
+            {/* 슬라이더 - 5 단위 */}
+            <div className="mt-2 px-1 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+              <input
+                type="range"
+                min="5"
+                max={LIMITS.MAX_DIMENSION_CM}
+                step="5"
+                value={Math.round(formData.widthCm / 5) * 5}
+                onChange={(e) => {
+                  const sliderValue = parseInt(e.target.value);
+                  handleChange('widthCm', sliderValue, true);
+                }}
+                className="w-full appearance-none cursor-pointer slider"
+              />
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <span>5</span>
+              <span>{LIMITS.MAX_DIMENSION_CM}</span>
+            </div>
             {errors.widthCm && (
               <p className="text-red-500 dark:text-red-400 text-xs mt-1 transition-colors duration-200">{errors.widthCm}</p>
             )}
@@ -227,6 +305,25 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
                 errors.depthCm ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
               }`}
             />
+            {/* 슬라이더 - 5 단위 */}
+            <div className="mt-2 px-1 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+              <input
+                type="range"
+                min="5"
+                max={LIMITS.MAX_DIMENSION_CM}
+                step="5"
+                value={Math.round(formData.depthCm / 5) * 5}
+                onChange={(e) => {
+                  const sliderValue = parseInt(e.target.value);
+                  handleChange('depthCm', sliderValue, true);
+                }}
+                className="w-full appearance-none cursor-pointer slider"
+              />
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <span>5</span>
+              <span>{LIMITS.MAX_DIMENSION_CM}</span>
+            </div>
             {errors.depthCm && (
               <p className="text-red-500 dark:text-red-400 text-xs mt-1 transition-colors duration-200">{errors.depthCm}</p>
             )}
@@ -249,6 +346,25 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
                 errors.heightCm ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
               }`}
             />
+            {/* 슬라이더 - 5 단위 */}
+            <div className="mt-2 px-1 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+              <input
+                type="range"
+                min="5"
+                max={LIMITS.MAX_DIMENSION_CM}
+                step="5"
+                value={Math.round(formData.heightCm / 5) * 5}
+                onChange={(e) => {
+                  const sliderValue = parseInt(e.target.value);
+                  handleChange('heightCm', sliderValue, true);
+                }}
+                className="w-full appearance-none cursor-pointer slider"
+              />
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <span>5</span>
+              <span>{LIMITS.MAX_DIMENSION_CM}</span>
+            </div>
             {errors.heightCm && (
               <p className="text-red-500 dark:text-red-400 text-xs mt-1 transition-colors duration-200">{errors.heightCm}</p>
             )}
@@ -284,10 +400,30 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
             max={LIMITS.MAX_WEIGHT_KG}
             value={formData.weightKg}
             onChange={(e) => handleChange('weightKg', e.target.value)}
+            onKeyDown={handleKeyDown}
             className={`w-full px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-colors duration-200 ${
               errors.weightKg ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
             }`}
           />
+          {/* 슬라이더 - 1 단위 */}
+          <div className="mt-2 px-1 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+            <input
+              type="range"
+              min="1"
+              max={LIMITS.MAX_WEIGHT_KG}
+              step="1"
+              value={Math.round(formData.weightKg)}
+              onChange={(e) => {
+                const sliderValue = parseInt(e.target.value);
+                handleChange('weightKg', sliderValue, true);
+              }}
+              className="w-full appearance-none cursor-pointer slider"
+            />
+          </div>
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <span>1</span>
+            <span>{LIMITS.MAX_WEIGHT_KG.toLocaleString()}</span>
+          </div>
           {errors.weightKg && (
             <p className="text-red-500 dark:text-red-400 text-xs mt-1 transition-colors duration-200">{errors.weightKg}</p>
           )}
