@@ -168,9 +168,9 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-blue-300 dark:border-blue-600">
-                <th className="text-left py-2 px-3 text-blue-700 dark:text-blue-300 font-medium">해외 배송비</th>
-                <th className="text-left py-2 px-3 text-blue-700 dark:text-blue-300 font-medium">국내 배송비</th>
-                <th className="text-right py-2 px-3 text-blue-700 dark:text-blue-300 font-medium">예상 총 비용</th>
+                <th className="text-left py-2 px-3 text-blue-700 dark:text-blue-300 font-medium">해외</th>
+                <th className="text-left py-2 px-3 text-blue-700 dark:text-blue-300 font-medium">국내</th>
+                <th className="text-right py-2 px-3 text-blue-700 dark:text-blue-300 font-medium">총 비용</th>
               </tr>
             </thead>
             <tbody>
@@ -213,7 +213,7 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
           <div className="grid grid-cols-3 gap-4">
           <div>
             <label htmlFor="widthCm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-200">
-              가로 (cm)
+              가로
             </label>
             <input
               type="number"
@@ -254,7 +254,7 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
           
           <div>
             <label htmlFor="depthCm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-200">
-              세로 (cm)
+              세로
             </label>
             <input
               type="number"
@@ -295,7 +295,7 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
           
           <div>
             <label htmlFor="heightCm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-200">
-              높이 (cm)
+              높이
             </label>
             <input
               type="number"
@@ -334,20 +334,19 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
             )}
           </div>
           </div>
-          
-          {/* 견적 요약 표시 - 크기 입력 필드 바로 아래 */}
-          {renderSummary()}
         </div>
 
         {/* 부피 및 부피중량 표시 */}
         <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md transition-colors duration-200">
-          <div className="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-200">
-            <span className="font-medium">부피:</span>{' '}
-            {(formData.widthCm * formData.depthCm * formData.heightCm).toLocaleString()} ㎤
-          </div>
-          <div className="text-sm text-gray-600 dark:text-gray-300 mt-1 transition-colors duration-200">
-            <span className="font-medium">부피중량:</span>{' '}
-            {volumeWeight.toFixed(2)} kg
+          <div className="text-sm text-gray-600 dark:text-gray-300 transition-colors duration-200 flex items-center gap-4">
+            <span>
+              <span className="font-medium">부피:</span>{' '}
+              {(formData.widthCm * formData.depthCm * formData.heightCm).toLocaleString()} ㎤
+            </span>
+            <span>
+              <span className="font-medium">부피중량:</span>{' '}
+              {volumeWeight.toFixed(2)} kg
+            </span>
           </div>
         </div>
 
@@ -403,6 +402,9 @@ export default function QuoteForm({ onSubmit, result }: QuoteFormProps) {
             )}
           </div>
         </div>
+
+        {/* 견적 요약 표시 - 적용 무게 섹션 아래, 배송 방식 선택 위 */}
+        {renderSummary()}
 
         {/* 배송 방식 선택 */}
         <div className="mb-4">

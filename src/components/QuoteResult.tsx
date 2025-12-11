@@ -311,7 +311,7 @@ export default function QuoteResult({ result }: QuoteResultProps) {
         <div className="space-y-3 mb-6">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3 transition-colors duration-200">요금 내역</h3>
           
-          <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+          <div className="flex justify-between items-center py-2 transition-colors duration-200">
             <span className="text-gray-600 dark:text-gray-400 transition-colors duration-200">국제 배송비</span>
             <span className="font-medium text-gray-800 dark:text-gray-200 transition-colors duration-200">
               {breakdown.baseShipping.toLocaleString()}원
@@ -319,7 +319,7 @@ export default function QuoteResult({ result }: QuoteResultProps) {
           </div>
 
           {breakdown.domesticShipping > 0 && (
-            <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <div className="flex justify-between items-center py-2 transition-colors duration-200">
               <span className="text-gray-600 dark:text-gray-400 transition-colors duration-200">국내 배송비 (경동택배)</span>
               <span className="font-medium text-gray-800 dark:text-gray-200 transition-colors duration-200">
                 {breakdown.domesticShipping.toLocaleString()}원

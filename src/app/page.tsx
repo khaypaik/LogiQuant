@@ -53,7 +53,7 @@ export default function Home() {
             {result && result.success && (
               <div className="mt-6">
                 <AdSense 
-                  adSlot="1234567890" 
+                  adSlot="1953996830" 
                   adFormat="auto"
                   fullWidthResponsive={true}
                   className="rounded-lg"
@@ -85,7 +85,7 @@ export default function Home() {
         {/* 페이지 하단 광고 */}
         <div className="mt-8">
           <AdSense 
-            adSlot="1234567890" 
+            adSlot="7482473927" 
             adFormat="auto"
             fullWidthResponsive={true}
             className="rounded-lg"
