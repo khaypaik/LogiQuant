@@ -70,3 +70,9 @@ export const DOMESTIC_SHIPPING_THRESHOLD = {
   SUM_OF_SIDES_CM: 160,             // 가로+세로+높이 합계 기준 (cm)
 } as const;
 
+/**
+ * 요율/계산 로직 버전 (API 응답 헤더로 노출하여 추적 가능하게 함)
+ * - 가성비 목적: DB/관리자 없이도 "언제 규칙이 바뀌었는지"를 추적할 수 있음
+ */
+export const RATES_VERSION = '2025-12-18' as const;
+
